@@ -5,20 +5,12 @@ import RPi.GPIO as GPIO
 
 def setup():
     # declare pin standard
-    GPIO.setmode(GPIO.BCM)
+    # GPIO.setmode(GPIO.BCM)
     # Set pin mode for GPIO pins to OUTPUT
     for values in availableColors.values():
         pin = values['pin']
         print("pin: " + str(pin))
         GPIO.setup(pin, GPIO.OUT, initial=GPIO.LOW)
-
-
-def turnLedOn(pin: int):
-    GPIO.output(pin, GPIO.HIGH)
-
-
-def turnLedOff(pin: int):
-    GPIO.output(pin, GPIO.LOW)
 
 
 ## GUI DEFINITIONS ##
@@ -29,26 +21,15 @@ myFont = tkfont.Font(family="Helvetica", size=12, weight="bold")
 ## EVENT FUNCTIONS ##
 
 
-def ledToggle(pin: int):
-    print(f"button pressed {sharedVariable.get()}")
-    for value in availableColors.values():
-        if (value['pin'] == pin):
-            turnLedOn(pin)
-        else:
-            turnLedOff(value['pin'])
-
-
-def diselectAllBtns():
-    # turn off LEDs
-    sharedVariable.set("")
-    for value in availableColors.values():
-        pin = value['pin']
-        turnLedOff(pin)
+def dimLed(pin: int, duty: int):
+    print(f"button pressed")
+    print(f'pin: {pin}')
+    GPIO.PWM(pin, 1000).ChangeDutyCycle(duty)
 
 
 def close():
     # turn led off
-    GPIO.cleanup()
+    # GPIO.cleanup()
     print("closing program")
     # exit program
     mainWindow.destroy()
@@ -77,19 +58,13 @@ availableColors = {
 
 ### WIDGETS ###
 
-sharedVariable = tk.StringVar(mainWindow, "")
+redSlider = tk.Scale(mainWindow, from_=0, to=255, orient='horizontal', activebackground='#ffaaaa', bg=availableColors['red']['hexCode'],
+                     bd=0, command=lambda duty: dimLed(availableColors['red']['pin'], duty), font=myFont, label=availableColors['red']['label']).grid()
 
-noneBtn = tk.Radiobutton(mainWindow, indicatoron=0, variable=sharedVariable, value="", text="None", font=myFont,
-                         command=lambda: diselectAllBtns(), bg="gray", width=24).grid()
-
-redbtn = tk.Radiobutton(mainWindow, indicatoron=0, variable=sharedVariable, value=availableColors['red']['value'], text=availableColors['red']['label'], font=myFont,
-                        command=lambda: ledToggle(pin=availableColors['red']['pin']), bg=availableColors['red']['hexCode'], width=24).grid()
-
-greeBtn = tk.Radiobutton(mainWindow, indicatoron=0, variable=sharedVariable, value=availableColors['green']['value'], text=availableColors['green']['label'], font=myFont,
-                         command=lambda: ledToggle(pin=availableColors['green']['pin']), bg=availableColors['green']['hexCode'], width=24).grid()
-
-blueBtn = tk.Radiobutton(mainWindow, indicatoron=0, variable=sharedVariable, value=availableColors['blue']['value'], text=availableColors['blue']['label'], font=myFont,
-                         command=lambda: ledToggle(pin=availableColors['blue']['pin']), bg=availableColors['blue']['hexCode'], width=24).grid()
+greenSlider = tk.Scale(mainWindow, from_=0, to=255, orient='horizontal', activebackground='#ffaaaa', bg=availableColors['green']['hexCode'],
+                       bd=0, command=lambda duty: dimLed(availableColors['green']['pin'], duty), font=myFont, label=availableColors['red']['label']).grid()
+blueSlider = tk.Scale(mainWindow, from_=0, to=255, orient='horizontal', activebackground='#ffaaaa', bg=availableColors['blue']['hexCode'],
+                      bd=0, command=lambda duty: dimLed(availableColors['blue']['pin'], duty), font=myFont, label=availableColors['red']['label']).grid()
 
 
 # for value in availableColors.values():
